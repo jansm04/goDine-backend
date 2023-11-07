@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 
 const { callAPI } = require('./api-call');
@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json()); // middleware to parse data
 
 app.get('/api/call', async (req, res) => {
-    const mood = req.query.mood;
+    const type = "classy";
     try {
-        const data = await callAPI(mood);
+        const data = await callAPI(type);
         res.json({ data });
     } catch (error) {
         res.status(500).json({ error: `Error: ${error}`});
