@@ -6,13 +6,13 @@ console.log(openAI_key);
 
 const openai = new openAI({ apiKey: openAI_key });
 
-async function callAPI(type) {
+async function callAPI(type, mood) {
     try {
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [{
                 "role": "user", 
-                "content": `List the 5 best ${type} restaurants in Toronto. Include names only.`,
+                "content": `List the 5 best ${mood} ${type} restaurants in Toronto. Include names only.`,
             }]
           });
         return response.choices[0].message.content;
