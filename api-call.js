@@ -12,10 +12,9 @@ async function callAPI(type) {
             model: "gpt-3.5-turbo",
             messages: [{
                 "role": "user", 
-                "content": `What are the 5 best ${type} restaurants in Toronto?`,
+                "content": `List the 5 best ${type} restaurants in Toronto. Include names only.`,
             }]
           });
-        console.log(response.choices[0].message.content);
         return response.choices[0].message.content;
     } catch (error) {
         console.log("An error occurred fetching the OpenAI response.");

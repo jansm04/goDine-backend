@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json()); // middleware to parse data
 
 app.get('/api/call', async (req, res) => {
-    const type = "classy";
+    const type = req.query.type;
     try {
         const data = await callAPI(type);
         res.json({ data });
