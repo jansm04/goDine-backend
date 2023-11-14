@@ -1,6 +1,5 @@
 const openAI = require('openai');
 require('dotenv').config();
-const request = require('request');
 
 const openAI_key = process.env.OPENAI_KEY;
 const places_key = process.env.PLACES_KEY;
@@ -27,11 +26,11 @@ async function callAPI(type, mood) {
 
           // map array to place objects using Google Places API
           for (let i = 0; i < words.length; i++) {
-
+            const name = words[i];
             const places_response = await fetch("https://places.googleapis.com/v1/places:searchText", {
               method: "POST",
               body: JSON.stringify({
-                textQuery: words[i],
+                textQuery: name,
                 locationBias: {
                   circle: {
                     // search for locations exclusively in Toronto, ON
@@ -44,12 +43,21 @@ async function callAPI(type, mood) {
               headers: {
                 "Content-type": "application/json; charset=UTF-8",
                 "X-Goog-Api-Key": places_key,
-                "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel,places.location,places.websiteUri"
+                "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel,places.location,places.websiteUri,places.id"
               }
             });
-            const json = await places_response.json();
-            words[i] = json.places[0]; // take first result
-            console.log(json.places[0]); 
+            if (places_response.ok) {
+              const json = await places_response.json();
+              if (json.places.length == 0) {
+                console.log(`No place details found for ${name}.`);
+                return;
+              }
+              words[i] = json.places[0]; // take first result
+              console.log(json.places[0]); 
+            } else {
+              console.log(`An error occurred fetching place details for ${name}.`);
+              return;
+            } 
           }
 
         return words;
