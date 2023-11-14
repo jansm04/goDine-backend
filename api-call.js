@@ -16,6 +16,7 @@ async function callAPI(type, mood) {
             model: "gpt-3.5-turbo",
             messages: [{
                 "role": "user", 
+                // PROMPT: asks for list of restaurant names ready to be parsed
                 "content": `Return one line of text consisting of the 5 best ${mood} ${type} restaurants in Toronto. 
                             Include names only, each separated by a '#'.`,
             }]
@@ -33,6 +34,7 @@ async function callAPI(type, mood) {
                 textQuery: words[i],
                 locationBias: {
                   circle: {
+                    // search for locations exclusively in Toronto, ON
                     center: { latitude: 43.6532, longitude: -79.3832 },
                     radius: 20000.0
                   }
@@ -42,7 +44,7 @@ async function callAPI(type, mood) {
               headers: {
                 "Content-type": "application/json; charset=UTF-8",
                 "X-Goog-Api-Key": places_key,
-                "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel"
+                "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel,places.location,places.websiteUri"
               }
             });
             const json = await places_response.json();
