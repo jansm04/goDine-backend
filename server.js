@@ -15,7 +15,7 @@ app.get('/api/call', async (req, res) => {
     const mood = req.query.mood;
     try {
         const data = await callAPI(type, mood);
-        res.json({ data });
+        res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: `Error: ${error}`});
     }

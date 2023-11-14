@@ -1,7 +1,10 @@
 const openAI = require('openai');
 require('dotenv').config();
+const request = require('request');
 
 const openAI_key = process.env.OPENAI_KEY;
+const places_key = process.env.PLACES_KEY;
+
 console.log(openAI_key);
 
 const openai = new openAI({ apiKey: openAI_key });
@@ -9,7 +12,7 @@ const openai = new openAI({ apiKey: openAI_key });
 
 async function callAPI(type, mood) {
     try {
-        const response = await openai.chat.completions.create({
+        const ai_response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [{
                 "role": "user", 
@@ -18,11 +21,33 @@ async function callAPI(type, mood) {
             }]
           });
           // create array of restaurant names
-          const text = response.choices[0].message.content;
+          const text = ai_response.choices[0].message.content;
           const words = text.split('#');
 
+          // map array to place objects using Google Places API
           for (let i = 0; i < words.length; i++) {
-            console.log(`${i+1}. ${words[i]}`);
+
+            const places_response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+              method: "POST",
+              body: JSON.stringify({
+                textQuery: words[i],
+                locationBias: {
+                  circle: {
+                    center: { latitude: 43.6532, longitude: -79.3832 },
+                    radius: 20000.0
+                  }
+                },
+                language_code: "en"
+              }),
+              headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "X-Goog-Api-Key": places_key,
+                "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel"
+              }
+            });
+            const json = await places_response.json();
+            words[i] = json.places[0]; // take first result
+            console.log(json.places[0]); 
           }
 
         return words;
