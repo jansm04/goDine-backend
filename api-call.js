@@ -23,6 +23,7 @@ async function callAPI(type, mood) {
           // create array of restaurant names
           const text = ai_response.choices[0].message.content;
           const words = text.split('#');
+          console.log(words);
 
           // map array to place objects using Google Places API
           for (let i = 0; i < words.length; i++) {
@@ -35,7 +36,7 @@ async function callAPI(type, mood) {
                   circle: {
                     // search for locations exclusively in Toronto, ON
                     center: { latitude: 43.6532, longitude: -79.3832 },
-                    radius: 20000.0
+                    radius: 50000.0
                   }
                 },
                 language_code: "en"
@@ -54,8 +55,12 @@ async function callAPI(type, mood) {
                 console.log(`No place details found for ${name}.`);
                 return;
               }
-              words[i] = json.places[0]; // take first result
-              console.log(json.places[0]); 
+              // filter out results not in Toronto, ON
+              const filtered_places = json.places.filter(p => {
+                return p.formattedAddress.includes("Toronto");
+              })
+              words[i] = filtered_places[0]; // take first result
+              console.log(filtered_places[0]); 
             } else {
               console.log(`An error occurred fetching place details for ${name}.`);
               return;
