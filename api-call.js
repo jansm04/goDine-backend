@@ -16,7 +16,7 @@ async function callAPI(type, mood) {
             messages: [{
                 "role": "user", 
                 // PROMPT: asks for list of restaurant names ready to be parsed
-                "content": `Return one line of text consisting of the 5 best ${mood} ${type} restaurants in Toronto. 
+                "content": `Return one line of text consisting of the 4 best ${mood} ${type} restaurants in Toronto. 
                             Include names only, each separated by a '#'.`,
             }]
           });
@@ -43,7 +43,9 @@ async function callAPI(type, mood) {
               headers: {
                 "Content-type": "application/json; charset=UTF-8",
                 "X-Goog-Api-Key": places_key,
-                "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel,places.location,places.websiteUri,places.id"
+                "X-Goog-FieldMask": 
+                  "places.displayName,places.formattedAddress,places.priceLevel," + 
+                  "places.location,places.websiteUri,places.id,places.rating"
               }
             });
             if (places_response.ok) {
