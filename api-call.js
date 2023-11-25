@@ -56,8 +56,6 @@ async function callAPI(type, mood) {
               const filtered_places = json.places.filter(p => {
                 return p.formattedAddress.includes("Toronto");
               })
-              words[i] = filtered_places[0]; // take first result
-              console.log(filtered_places[0]); 
               if (filtered_places == 0) {
                 console.log(`No place details found for ${name}.`);
                 words.splice(i--, 1);
