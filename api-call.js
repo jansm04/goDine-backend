@@ -16,12 +16,13 @@ async function callAPI(type, mood) {
             messages: [{
                 "role": "user", 
                 // PROMPT: asks for list of restaurant names ready to be parsed
-                "content": `Return one line of text consisting of the 4 best ${mood} ${type} restaurants in Toronto. 
-                            Include names only, each separated by a '#'.`,
+                "content": `Return one line of text consisting of the 4 best ${mood} ${type} restaurants in TORONTO, ON. 
+                            Include names ONLY, each separated by a '#' symbol.`,
             }]
           });
           // create array of restaurant names
           const text = ai_response.choices[0].message.content;
+          console.log("AI Response: " + text);
           const words = text.split('#');
           console.log(words);
 
@@ -51,14 +52,17 @@ async function callAPI(type, mood) {
             });
             if (places_response.ok) {
               const json = await places_response.json();
-              if (json.places.length == 0) {
-                console.log(`No place details found for ${name}.`);
-                return;
-              }
               // filter out results not in Toronto, ON
               const filtered_places = json.places.filter(p => {
                 return p.formattedAddress.includes("Toronto");
               })
+              words[i] = filtered_places[0]; // take first result
+              console.log(filtered_places[0]); 
+              if (filtered_places == 0) {
+                console.log(`No place details found for ${name}.`);
+                words.splice(i--, 1);
+                continue;
+              }
               words[i] = filtered_places[0]; // take first result
               console.log(filtered_places[0]); 
             } else {
@@ -69,8 +73,16 @@ async function callAPI(type, mood) {
 
         return words;
     } catch (error) {
-        console.log("An error occurred fetching the OpenAI response.");
-        return error;
+        console.log(error);
+        return [{
+          id: 'error',
+          formattedAddress: '',
+          location: { latitude: 0, longitude: 0 },
+          rating: 0,
+          websiteUri: '',
+          priceLevel: '',
+          displayName: { text: 'AI Response Error', languageCode: 'en' }
+        }];
     }    
 }
 
