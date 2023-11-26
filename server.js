@@ -11,10 +11,11 @@ app.use(cors());
 app.use(express.json()); // middleware to parse data
 
 app.get('/api/call', async (req, res) => {
+    const city = req.query.city;
     const type = req.query.type;
     const mood = req.query.mood;
     try {
-        const data = await callAPI(type, mood);
+        const data = await callAPI(city, type, mood);
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: `Error: ${error}`});

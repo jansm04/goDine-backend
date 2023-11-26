@@ -7,16 +7,19 @@ const places_key = process.env.PLACES_KEY;
 console.log(openAI_key);
 
 const openai = new openAI({ apiKey: openAI_key });
+const locations = new Map();
+locations.set("Toronto", { latitude: 43.6532, longitude: -79.3832 });
+locations.set("Vancouver", { latitude: 49.2827, longitude: -123.1207 });
+locations.set("Montreal", { latitude: 45.5019, longitude: -73.5674 });
 
-
-async function callAPI(type, mood) {
+async function callAPI(city, type, mood) {
     try {
         const ai_response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [{
                 "role": "user", 
                 // PROMPT: asks for list of restaurant names ready to be parsed
-                "content": `Return one line of text consisting of the 4 best ${mood} ${type} restaurants in TORONTO, ON. 
+                "content": `Return one line of text consisting of the 4 best ${mood} ${type} restaurants in ${city}, Canada. 
                             Include names ONLY, each separated by a '#' symbol.`,
             }]
           });
@@ -35,8 +38,7 @@ async function callAPI(type, mood) {
                 textQuery: name,
                 locationBias: {
                   circle: {
-                    // search for locations exclusively in Toronto, ON
-                    center: { latitude: 43.6532, longitude: -79.3832 },
+                    center: locations.get(city),
                     radius: 50000.0
                   }
                 },
@@ -53,10 +55,15 @@ async function callAPI(type, mood) {
             if (places_response.ok) {
               const json = await places_response.json();
               // filter out results not in Toronto, ON
+              if (!json) {
+                console.log(`No json object found for ${name}.`);
+                words.splice(i--, 1);
+                continue;
+              }
               const filtered_places = json.places.filter(p => {
-                return p.formattedAddress.includes("Toronto");
+                return p.formattedAddress.includes(city);
               })
-              if (filtered_places == 0) {
+              if (!filtered_places) {
                 console.log(`No place details found for ${name}.`);
                 words.splice(i--, 1);
                 continue;
@@ -64,22 +71,22 @@ async function callAPI(type, mood) {
               words[i] = filtered_places[0]; // take first result
               console.log(filtered_places[0]); 
             } else {
-              console.log(`An error occurred fetching place details for ${name}.`);
-              return;
+              console.log(`An error occurred fetching the place details.`);
+              words.splice(i--, 1);
             } 
           }
-
-        return words;
+        if (words) return words;
+        else {
+          return [{
+            id: 'error',
+            displayName: { text: 'Could not find any results this time. Please try again.', languageCode: 'en' }
+          }];
+        }
     } catch (error) {
         console.log(error);
         return [{
           id: 'error',
-          formattedAddress: '',
-          location: { latitude: 0, longitude: 0 },
-          rating: 0,
-          websiteUri: '',
-          priceLevel: '',
-          displayName: { text: 'AI Response Error', languageCode: 'en' }
+          displayName: { text: 'A problem occurred while fetching the response. Please try again.', languageCode: 'en' }
         }];
     }    
 }
