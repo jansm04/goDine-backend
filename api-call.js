@@ -1,5 +1,6 @@
 const openAI = require('openai');
 require('dotenv').config();
+const locations = require('./locations');
 
 const openAI_key = process.env.OPENAI_KEY;
 const places_key = process.env.PLACES_KEY;
@@ -7,10 +8,6 @@ const places_key = process.env.PLACES_KEY;
 console.log(openAI_key);
 
 const openai = new openAI({ apiKey: openAI_key });
-const locations = new Map();
-locations.set("Toronto", { latitude: 43.6532, longitude: -79.3832 });
-locations.set("Vancouver", { latitude: 49.2827, longitude: -123.1207 });
-locations.set("Montreal", { latitude: 45.5019, longitude: -73.5674 });
 
 async function callAPI(city, type, mood) {
     try {
