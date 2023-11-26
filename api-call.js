@@ -60,22 +60,19 @@ async function callAPI(city, type, mood) {
                 words.splice(i--, 1);
                 continue;
               }
-              const filtered_places = json.places.filter(p => {
-                return p.formattedAddress.includes(city);
-              })
-              if (!filtered_places) {
+              if (json.places.length == 0) {
                 console.log(`No place details found for ${name}.`);
                 words.splice(i--, 1);
                 continue;
               }
-              words[i] = filtered_places[0]; // take first result
-              console.log(filtered_places[0]); 
+              words[i] = json.places[0]; // take first result
+              console.log(json.places[0]); 
             } else {
               console.log(`An error occurred fetching the place details.`);
               words.splice(i--, 1);
             } 
           }
-        if (words) return words;
+        if (words.length > 0) return words;
         else {
           return [{
             id: 'error',
