@@ -1,6 +1,6 @@
 const openAI = require('openai');
 require('dotenv').config();
-const locations = require('./locations');
+const { locations, provinces } = require('./locations');
 
 const openAI_key = process.env.OPENAI_KEY;
 const places_key = process.env.PLACES_KEY;
@@ -76,9 +76,11 @@ async function callAPI(city, type, mood) {
                 if (isDuplicate(words, json.places[j], j)) {
                   console.log('Duplicate place found.');
                 } else {
-                  words[i] = json.places[j];
-                  found = true;
-                  break;
+                  if (json.places[j].formattedAddress.includes(provinces.get(city))) {
+                    words[i] = json.places[j];
+                    found = true;
+                    break;
+                  }
                 }
               }
               if (!found) {
