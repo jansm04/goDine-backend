@@ -9,6 +9,14 @@ console.log(openAI_key);
 
 const openai = new openAI({ apiKey: openAI_key });
 
+function isDuplicate(words, place, idx) {
+  for (i = 0; i < idx; i++) {
+    if (words[i].id == place.id)
+      return true;
+  }
+  return false;
+}
+
 async function callAPI(city, type, mood) {
     try {
         const ai_response = await openai.chat.completions.create({
@@ -62,14 +70,30 @@ async function callAPI(city, type, mood) {
                 words.splice(i--, 1);
                 continue;
               }
-              words[i] = json.places[0]; // take first result
-              console.log(json.places[0]); 
+              // prevent duplicates
+              let found = false;
+              for (let j = 0; j < json.places.length; j++) {
+                if (isDuplicate(words, json.places[j], j)) {
+                  console.log('Duplicate place found.');
+                } else {
+                  words[i] = json.places[j];
+                  found = true;
+                  break;
+                }
+              }
+              if (!found) {
+                words.splice(i--, 1);
+                console.log(`No place details found for ${name}. Only duplicates found.`);
+              }
             } else {
               console.log(`An error occurred fetching the place details.`);
               words.splice(i--, 1);
             } 
           }
-        if (words.length > 0) return words;
+        if (words.length > 0) {
+          console.log(words);
+          return words;
+        }
         else {
           return [{
             id: 'error',
