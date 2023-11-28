@@ -1,6 +1,6 @@
 const openAI = require('openai');
 require('dotenv').config();
-const { locations, provinces } = require('./locations');
+const { locations, provinces } = require('./maps');
 
 const openAI_key = process.env.OPENAI_KEY;
 const places_key = process.env.PLACES_KEY;
@@ -31,7 +31,7 @@ async function callAPI(city, type, mood) {
           // create array of restaurant names
           const text = ai_response.choices[0].message.content;
           console.log("AI Response: " + text);
-          const words = text.split('#');
+          var words = text.split('#');
           console.log(words);
 
           // map array to place objects using Google Places API
@@ -60,11 +60,6 @@ async function callAPI(city, type, mood) {
             if (places_response.ok) {
               const json = await places_response.json();
               // filter out results not in Toronto, ON
-              if (!json) {
-                console.log(`No json object found for ${name}.`);
-                words.splice(i--, 1);
-                continue;
-              }
               if (json.places.length == 0) {
                 console.log(`No place details found for ${name}.`);
                 words.splice(i--, 1);
