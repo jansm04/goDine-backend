@@ -16,16 +16,28 @@ async function callAPI(city, type, mood) {
           messages: [{
               "role": "user", 
               // PROMPT: asks for list of restaurant names ready to be parsed
-              "content": `Return one line of text consisting of the 4 best ${mood} ${type} restaurants in ${city}, Canada. 
+              "content": `Print one line of text consisting of the 4 best ${mood} ${type} restaurants in ${city}, Canada. 
                           Include names ONLY, each separated by a '#' symbol.`,
           }]
         });
         // create array of restaurant names
-        const text = ai_response.choices[0].message.content;
-        console.log("AI Response: " + text);
-        var words = text.split('#');
-        console.log(words);
-
+        var count = 0;
+        while (true) {
+          const text = ai_response.choices[0].message.content;
+          console.log("AI Response: " + text);
+          var words = text.split('#');
+          console.log(`Attempt ${count}: ${words}`);
+          if (words.length == 4) 
+            break;
+          if (count++ == 5) {
+            console.log("Error: failed to parse AI reponse string.");
+            return [{
+              id: 'error',
+              displayName: { text: 'A problem occurred while fetching the response. Please try again.', languageCode: 'en' }
+            }];
+          }
+        }
+      
         // map array to place objects using Google Places API
         let places_set = new Set();
         for (let i = 0; i < words.length; i++) {
@@ -52,7 +64,6 @@ async function callAPI(city, type, mood) {
           });
           if (places_response.ok) {
             const json = await places_response.json();
-            // filter out results not in Toronto, ON
             if (json.places.length == 0) {
               console.log(`No place details found for ${name}.`);
               continue;
